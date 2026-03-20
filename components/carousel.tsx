@@ -12,17 +12,22 @@ interface Props {
 }
 
 export const Carousel = ({ products }: Props) => {
-    const [current, setCurrent] = useState<number>(0);
+  const [current, setCurrent] = useState<number>(0);
 
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setCurrent((prev) => (prev + 1) % products.length);
-        }, 3000);
-        return () => clearInterval(interval);
-    }, [products.length]);  
+  useEffect(() => {
+    if (products.length === 0) return;
+    const interval = setInterval(() => {
+      setCurrent((prev) => (prev + 1) % products.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [products.length]);
 
-    const currentProduct = products[current];
-    const price = currentProduct.default_price as Stripe.Price;
+  if (products.length === 0) return null;
+
+  const currentProduct = products[current];
+  if (!currentProduct) return null;
+
+  const price = currentProduct.default_price as Stripe.Price;
        
 
   return (
@@ -32,9 +37,8 @@ export const Carousel = ({ products }: Props) => {
           <Image
             src={currentProduct.images[0]}
             alt={currentProduct.name}
-            layout="fill"
-            objectFit="cover"
-            className="transition-opacity duration-500 ease-in-out"
+            fill
+            className="object-cover transition-opacity duration-500 ease-in-out"
           />
         </div>
       )}

@@ -5,10 +5,32 @@ import Link from "next/link";
 import { Carousel } from "@/components/carousel";
 
 export default async function Home() {
-  const products = await stripe.products.list({
-    expand: ["data.default_price"],
-    limit: 5,
-  });
+  let products;
+  try {
+    products = await stripe.products.list({
+      expand: ["data.default_price"],
+      limit: 5,
+    });
+  } catch (error) {
+    console.error("Stripe API error:", error);
+    return (
+      <div className="container mx-auto px-4 py-8 text-center">
+        <h1 className="text-3xl font-bold mb-4 pt-20">Under Maintenance</h1>
+        <p className="text-neutral-600">We are currently updating our products. Please check back later.</p>
+      </div>
+    );
+  }
+
+  if (!products.data || products.data.length === 0) {
+    return (
+      <div className="container mx-auto px-4 py-8 text-center">
+        <h1 className="text-3xl font-bold mb-4 pt-20">No Products Available</h1>
+        <p className="text-neutral-600">Stay tuned for our latest arrivals!</p>
+      </div>
+    );
+  }
+
+  const heroProduct = products.data[0];
 
   return (
     <div>
@@ -34,13 +56,15 @@ export default async function Home() {
               </Link>
             </Button>
           </div>
-          <Image
-            alt="Hero Image"
-            src={products.data[0].images[0]}
-            className="rounded"
-            width={250}
-            height={250}
-          />
+          {heroProduct.images?.[0] && (
+            <Image
+              alt={heroProduct.name}
+              src={heroProduct.images[0]}
+              className="rounded object-cover"
+              width={250}
+              height={250}
+            />
+          )}
         </div>
       </section>
       <section className="py-8">
